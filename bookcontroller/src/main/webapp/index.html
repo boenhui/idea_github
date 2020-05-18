@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .disable{
+            pointer-events: none;
+            color: gray;
+            cursor: pointer;
+        }
+    </style>
+    <script type="application/javascript" src="js/jquery-3.4.1.min.js"></script>
+    <script type="application/javascript">
+        $(function(){
+            function Aclick()
+            {
+                $.post(this.href,function(data){
+                    update(data);
+                })
+                return false;
+            }
+            function update(data){
+                    if (data.list.length>0)
+                    {
+                        $("tbody").empty();
+                        $.each(data.list,function (i,message) {
+                            var ms=$("<tr><td>"+message.id+"</td><td>"+message.name+"</td><td>"+message.price+"</td><td>"+message.stock+"</td></tr>");
+                            ms.appendTo($("tbody"));
+                        })
+                        var A="";
+                         A+="    <a id='prePage' href='findBookByName?pageNum="+data.prePage+"' disabled='disabled'>上一页</a>\n" +
+                            "    <a id='nextPage' href='findBookByName?pageNum="+data.nextPage+"'>下一页</a>";
+
+                        $.each(data.navigatepageNums,function(i,num){
+                            alert(num);
+                            A+=" <a id='nextPage' href='findBookByName?pageNum="+num+"'>"+num+"</a>"
+                        });
+
+
+                        $("#pageDiv").html(A);
+                        $("a").click(Aclick);
+                        if(data.isLastPage)
+                        {
+                            $("#nextPage").attr("class","disable");
+                        }
+                        if(data.isFirstPage)
+                        {
+                            $("#prePage").attr("class","disable");
+                        }
+                    }
+                    else
+                    {
+                        $("tbody").html("<tr>\n" +
+                            "        <td colspan=\"4\">查无此书</td>\n" +
+                            "    </tr>")
+                    }
+            }
+            $("#findBookByName").submit(function(){
+                $.post("findBookByName",
+                $(this).serialize(),
+                 function(data)
+                 {
+                     update(data);
+                });
+                return false;
+            });
+
+
+        });
+    </script>
+</head>
+<body>
+<form action="findBookByName" method="post" id="findBookByName">
+    书名:<input type="text" name="bookname"/>
+    <br/>
+    <input type="submit" value="查询"/>
+</form>
+
+<table border="1" cellspacing="0" cellpadding="10">
+    <thead>
+    <tr>
+        <th>图书编号</th>
+        <th>图书名称</th>
+        <th>图书价格</th>
+        <th>图书库存</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td colspan="4">暂无图书信息</td>
+    </tr>
+    </tbody>
+</table>
+<div id="pageDiv">
+
+</div>
+</body>
+</html>
